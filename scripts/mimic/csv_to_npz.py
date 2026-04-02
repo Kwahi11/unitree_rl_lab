@@ -48,6 +48,7 @@ simulation_app = app_launcher.app
 """Rest everything follows."""
 
 import torch
+import warp as wp
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
@@ -120,7 +121,7 @@ class MotionLoader:
         motion = motion.to(torch.float32).to(self.device)
         self.motion_base_poss_input = motion[:, :3]
         self.motion_base_rots_input = motion[:, 3:7]
-        self.motion_base_rots_input = self.motion_base_rots_input[:, [3, 0, 1, 2]]  # convert to wxyz
+        # self.motion_base_rots_input = self.motion_base_rots_input[:, [3, 0, 1, 2]]  # convert to wxyz (removed: IsaacLab 3.0 uses XYZW)
         self.motion_dof_poss_input = motion[:, 7:]
 
         self.input_frames = motion.shape[0]
@@ -263,33 +264,36 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         ) = motion.get_next_state()
 
         # set root state
-        root_states = robot.data.default_root_state.clone()
-        root_states[:, :3] = motion_base_pos
-        root_states[:, :2] += scene.env_origins[:, :2]
-        root_states[:, 3:7] = motion_base_rot
-        root_states[:, 7:10] = motion_base_lin_vel
-        root_states[:, 10:] = motion_base_ang_vel
-        robot.write_root_state_to_sim(root_states)
+        root_pose = wp.to_torch(robot.data.default_root_pose).clone()
+        root_vel = wp.to_torch(robot.data.default_root_vel).clone()
+        root_pose[:, :3] = motion_base_pos
+        root_pose[:, :2] += scene.env_origins[:, :2]
+        root_pose[:, 3:7] = motion_base_rot
+        root_vel[:, :3] = motion_base_lin_vel
+        root_vel[:, 3:] = motion_base_ang_vel
+        robot.write_root_pose_to_sim_index(root_pose=root_pose)
+        robot.write_root_velocity_to_sim_index(root_velocity=root_vel)
 
         # set joint state
-        joint_pos = robot.data.default_joint_pos.clone()
-        joint_vel = robot.data.default_joint_vel.clone()
+        joint_pos = wp.to_torch(robot.data.default_joint_pos).clone()
+        joint_vel = wp.to_torch(robot.data.default_joint_vel).clone()
         joint_pos[:, robot_joint_indexes] = motion_dof_pos
         joint_vel[:, robot_joint_indexes] = motion_dof_vel
-        robot.write_joint_state_to_sim(joint_pos, joint_vel)
+        robot.write_joint_position_to_sim_index(position=joint_pos)
+        robot.write_joint_velocity_to_sim_index(velocity=joint_vel)
         sim.render()  # We don't want physic (sim.step())
         scene.update(sim.get_physics_dt())
 
-        pos_lookat = root_states[0, :3].cpu().numpy()
+        pos_lookat = root_pose[0, :3].cpu().numpy()
         sim.set_camera_view(pos_lookat + np.array([2.0, 2.0, 0.5]), pos_lookat)
 
         if not file_saved:
-            log["joint_pos"].append(robot.data.joint_pos[0, :].cpu().numpy().copy())
-            log["joint_vel"].append(robot.data.joint_vel[0, :].cpu().numpy().copy())
-            log["body_pos_w"].append(robot.data.body_pos_w[0, :].cpu().numpy().copy())
-            log["body_quat_w"].append(robot.data.body_quat_w[0, :].cpu().numpy().copy())
-            log["body_lin_vel_w"].append(robot.data.body_lin_vel_w[0, :].cpu().numpy().copy())
-            log["body_ang_vel_w"].append(robot.data.body_ang_vel_w[0, :].cpu().numpy().copy())
+            log["joint_pos"].append(wp.to_torch(robot.data.joint_pos)[0, :].cpu().numpy().copy())
+            log["joint_vel"].append(wp.to_torch(robot.data.joint_vel)[0, :].cpu().numpy().copy())
+            log["body_pos_w"].append(wp.to_torch(robot.data.body_pos_w)[0, :].cpu().numpy().copy())
+            log["body_quat_w"].append(wp.to_torch(robot.data.body_quat_w)[0, :].cpu().numpy().copy())
+            log["body_lin_vel_w"].append(wp.to_torch(robot.data.body_lin_vel_w)[0, :].cpu().numpy().copy())
+            log["body_ang_vel_w"].append(wp.to_torch(robot.data.body_ang_vel_w)[0, :].cpu().numpy().copy())
 
         if reset_flag and not file_saved:
             file_saved = True
@@ -305,6 +309,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 
             np.savez(args_cli.output_name, **log)
             print("[INFO]: Motion npz file saved to", args_cli.output_name)
+            break
 
 
 def main():

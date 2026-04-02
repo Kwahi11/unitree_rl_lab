@@ -2,6 +2,8 @@ import numpy as np
 import os
 import yaml
 
+import warp as wp
+
 from isaaclab.assets import Articulation
 from isaaclab.envs import ManagerBasedRLEnv
 from isaaclab.utils import class_to_dict
@@ -28,12 +30,12 @@ def export_deploy_cfg(env: ManagerBasedRLEnv, log_dir):
     cfg["joint_ids_map"] = joint_ids_map
     cfg["step_dt"] = env.cfg.sim.dt * env.cfg.decimation
     stiffness = np.zeros(len(joint_sdk_names))
-    stiffness[joint_ids_map] = asset.data.default_joint_stiffness[0].detach().cpu().numpy().tolist()
+    stiffness[joint_ids_map] = wp.to_torch(asset.data.default_joint_stiffness)[0].detach().cpu().numpy().tolist()
     cfg["stiffness"] = stiffness.tolist()
     damping = np.zeros(len(joint_sdk_names))
-    damping[joint_ids_map] = asset.data.default_joint_damping[0].detach().cpu().numpy().tolist()
+    damping[joint_ids_map] = wp.to_torch(asset.data.default_joint_damping)[0].detach().cpu().numpy().tolist()
     cfg["damping"] = damping.tolist()
-    cfg["default_joint_pos"] = asset.data.default_joint_pos[0].detach().cpu().numpy().tolist()
+    cfg["default_joint_pos"] = wp.to_torch(asset.data.default_joint_pos)[0].detach().cpu().numpy().tolist()
 
     # --- commands ---
     cfg["commands"] = {}

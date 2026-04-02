@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import torch
+import warp as wp
 from typing import TYPE_CHECKING, Literal
 
 import isaaclab.utils.math as math_utils
@@ -27,7 +28,7 @@ def randomize_joint_default_pos(
     asset: Articulation = env.scene[asset_cfg.name]
 
     # save nominal value for export
-    asset.data.default_joint_pos_nominal = torch.clone(asset.data.default_joint_pos[0])
+    asset.data.default_joint_pos_nominal = wp.to_torch(asset.data.default_joint_pos)[0].clone()
 
     # resolve environment ids
     if env_ids is None:
@@ -40,14 +41,14 @@ def randomize_joint_default_pos(
         joint_ids = torch.tensor(asset_cfg.joint_ids, dtype=torch.int, device=asset.device)
 
     if pos_distribution_params is not None:
-        pos = asset.data.default_joint_pos.to(asset.device).clone()
+        pos = wp.to_torch(asset.data.default_joint_pos).clone()
         pos = _randomize_prop_by_op(
             pos, pos_distribution_params, env_ids, joint_ids, operation=operation, distribution=distribution
         )[env_ids][:, joint_ids]
 
         if env_ids != slice(None) and joint_ids != slice(None):
             env_ids = env_ids[:, None]
-        asset.data.default_joint_pos[env_ids, joint_ids] = pos
+        wp.to_torch(asset.data.default_joint_pos)[env_ids, joint_ids] = pos
         # update the offset in action since it is not updated automatically
         env.action_manager.get_term("JointPositionAction")._offset[env_ids, joint_ids] = pos
 
@@ -84,10 +85,10 @@ def randomize_rigid_body_com(
     rand_samples = math_utils.sample_uniform(ranges[:, 0], ranges[:, 1], (len(env_ids), 3), device="cpu").unsqueeze(1)
 
     # get the current com of the bodies (num_assets, num_bodies)
-    coms = asset.root_physx_view.get_coms().clone()
+    coms = wp.to_torch(asset.root_view.get_coms()).clone()
 
     # Randomize the com in range
     coms[:, body_ids, :3] += rand_samples
 
     # Set the new coms
-    asset.root_physx_view.set_coms(coms, env_ids)
+    asset.root_view.set_coms(wp.from_torch(coms.contiguous()), wp.from_torch(env_ids.int().contiguous()))

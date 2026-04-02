@@ -72,11 +72,11 @@ case "$1" in
         ;;
     -p|--play)
         shift
-        ${python_exe} ${UNITREE_RL_LAB_PATH}/scripts/rsl_rl/play.py "$@"
+        ${python_exe} ${UNITREE_RL_LAB_PATH}/scripts/rsl_rl/play.py --viz kit "$@"
         ;;
     -t|--train)
         shift
-        ${python_exe} ${UNITREE_RL_LAB_PATH}/scripts/rsl_rl/train.py --headless "$@"
+        ${python_exe} ${UNITREE_RL_LAB_PATH}/scripts/rsl_rl/train.py --viz none "$@"
         ;;
     *) # unknown option
         ;;
