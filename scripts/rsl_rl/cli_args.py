@@ -37,6 +37,20 @@ def add_rsl_rl_args(parser: argparse.ArgumentParser):
     arg_group.add_argument(
         "--log_project_name", type=str, default=None, help="Name of the logging project when using wandb or neptune."
     )
+    arg_group.add_argument("--wandb_entity", type=str, default=None, help="WandB entity/team name.")
+    arg_group.add_argument(
+        "--wandb_mode",
+        type=str,
+        default=None,
+        choices={"online", "offline", "disabled"},
+        help="WandB mode. Use 'offline' to store runs locally and sync later.",
+    )
+    arg_group.add_argument(
+        "--wandb_tags",
+        type=str,
+        default=None,
+        help="Comma-separated WandB tags, e.g. locomotion,g1,ppo.",
+    )
 
 
 def parse_rsl_rl_cfg(task_name: str, args_cli: argparse.Namespace) -> RslRlOnPolicyRunnerCfg:
@@ -89,6 +103,9 @@ def update_rsl_rl_cfg(agent_cfg: RslRlOnPolicyRunnerCfg, args_cli: argparse.Name
     if agent_cfg.logger in {"wandb", "neptune"} and args_cli.log_project_name:
         agent_cfg.wandb_project = args_cli.log_project_name
         agent_cfg.neptune_project = args_cli.log_project_name
+    elif agent_cfg.logger == "wandb" and not getattr(agent_cfg, "wandb_project", None):
+        # Fallback keeps wandb project non-empty when user doesn't pass --log_project_name.
+        agent_cfg.wandb_project = agent_cfg.experiment_name
 
     if agent_cfg.experiment_name == "":
         task_name = args_cli.task

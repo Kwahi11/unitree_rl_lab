@@ -124,6 +124,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # override configurations with non-hydra CLI arguments
     agent_cfg = cli_args.update_rsl_rl_cfg(agent_cfg, args_cli)
     agent_cfg = handle_deprecated_rsl_rl_cfg(agent_cfg, installed_version)
+
+    # Configure wandb process-level behavior from CLI.
+    if args_cli.logger == "wandb":
+        if args_cli.log_project_name:
+            os.environ["WANDB_PROJECT"] = args_cli.log_project_name
+        if getattr(args_cli, "wandb_entity", None):
+            os.environ["WANDB_ENTITY"] = args_cli.wandb_entity
+        if getattr(args_cli, "wandb_mode", None):
+            os.environ["WANDB_MODE"] = args_cli.wandb_mode
+        if getattr(args_cli, "wandb_tags", None):
+            os.environ["WANDB_TAGS"] = args_cli.wandb_tags
+
     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
     agent_cfg.max_iterations = (
         args_cli.max_iterations if args_cli.max_iterations is not None else agent_cfg.max_iterations
