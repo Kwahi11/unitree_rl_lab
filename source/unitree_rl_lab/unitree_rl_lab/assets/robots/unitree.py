@@ -394,6 +394,189 @@ UNITREE_G1_23DOF_CFG = UnitreeArticulationCfg(
     ],
 )
 
+YE_ROBOT_CFG = UnitreeArticulationCfg(
+    spawn=UnitreeUrdfFileCfg(
+        asset_path="/home/xxx/worksapce/unitree_rl_lab/source/unitree_rl_lab/unitree_rl_lab/assets/robots/yerobot/0401URDF/urdf/0401urdf.urdf",
+    ),
+    init_state=ArticulationCfg.InitialStateCfg(
+        pos=(0.0, 0.0, 0.75),
+        joint_pos={
+            ".*_hip_pitch_joint": -0.1,
+            ".*_knee_joint": 0.3,
+            ".*_ankle_pitch_joint": -0.2,
+            ".*_shoulder_pitch_joint": 0.3,
+            "left_shoulder_roll_joint": 0.25,
+            "right_shoulder_roll_joint": -0.25,
+            ".*_elbow_joint": -0.9,
+            "left_wrist_roll_joint": 0.15,
+            "right_wrist_roll_joint": -0.15,
+        },
+        joint_vel={".*": 0.0},
+    ),
+    actuators={
+        "N7520-14.3": ImplicitActuatorCfg(
+            joint_names_expr=[".*_hip_pitch_.*", ".*_hip_yaw_.*", "waist_yaw_joint"],  # 5
+            effort_limit_sim=88,
+            velocity_limit_sim=32.0,
+            stiffness={
+                ".*_hip_pitch_.*": 80.0,
+                ".*_hip_yaw_.*": 100.0,
+                "waist_yaw_joint": 200.0,
+            },
+            damping={
+                ".*_hip_pitch_.*": 3.0,
+                ".*_hip_yaw_.*": 2.0,
+                "waist_yaw_joint": 5.0,
+            },
+            armature=0.01,
+        ),
+        "N7520-22.5": ImplicitActuatorCfg(
+            joint_names_expr=[".*_hip_roll_.*", ".*_knee_.*"],  # 4
+            effort_limit_sim=139,
+            velocity_limit_sim=20.0,
+            stiffness={
+                ".*_hip_roll_.*": 100.0,
+                ".*_knee_.*": 150.0,
+            },
+            damping={
+                ".*_hip_roll_.*": 2.0,
+                ".*_knee_.*": 4.0,
+            },
+            armature=0.01,
+        ),
+        "N5020-16": ImplicitActuatorCfg(
+            joint_names_expr=[".*_shoulder_.*", ".*_elbow_.*", ".*_wrist_roll_.*"],  # 10
+            effort_limit_sim=25,
+            velocity_limit_sim=37,
+            stiffness=40.0,
+            damping=1.0,
+            armature=0.01,
+        ),
+        "N5020-16-parallel-pitch": ImplicitActuatorCfg(
+            joint_names_expr=[".*_ankle_pitch_.*"],  # 2
+            effort_limit_sim=18,
+            velocity_limit_sim=20,
+            stiffness=18.0,
+            damping=1.2,
+            armature=0.01,
+        ),
+        "N5020-16-parallel-roll": ImplicitActuatorCfg(
+            joint_names_expr=[".*_ankle_roll_.*"],  # 2
+            effort_limit_sim=28,
+            velocity_limit_sim=25,
+            stiffness=30.0,
+            damping=2.0,
+            armature=0.01,
+        ),
+    },
+    joint_sdk_names=[
+        "left_hip_pitch_joint",
+        "left_hip_roll_joint",
+        "left_hip_yaw_joint",
+        "left_knee_joint",
+        "left_ankle_pitch_joint",
+        "left_ankle_roll_joint",
+        "right_hip_pitch_joint",
+        "right_hip_roll_joint",
+        "right_hip_yaw_joint",
+        "right_knee_joint",
+        "right_ankle_pitch_joint",
+        "right_ankle_roll_joint",
+        "waist_yaw_joint",
+        "",
+        "",
+        "left_shoulder_pitch_joint",
+        "left_shoulder_roll_joint",
+        "left_shoulder_yaw_joint",
+        "left_elbow_joint",
+        "left_wrist_roll_joint",
+        "",
+        "",
+        "right_shoulder_pitch_joint",
+        "right_shoulder_roll_joint",
+        "right_shoulder_yaw_joint",
+        "right_elbow_joint",
+        "right_wrist_roll_joint",
+    ],
+)
+
+YE_ROBOT_ENCOS_CFG = UnitreeArticulationCfg(
+    spawn=UnitreeUrdfFileCfg(
+        asset_path="/home/xxx/worksapce/unitree_rl_lab/source/unitree_rl_lab/unitree_rl_lab/assets/robots/yerobot/0401URDF/urdf/0401urdf.urdf",
+    ),
+    init_state=ArticulationCfg.InitialStateCfg(
+        pos=(0.0, 0.0, 0.75),
+        joint_pos={
+            ".*_hip_pitch_joint": -0.1,
+            ".*_knee_joint": 0.3,
+            ".*_ankle_pitch_joint": -0.2,
+            ".*_shoulder_pitch_joint": 0.3,
+            "left_shoulder_roll_joint": 0.25,
+            "right_shoulder_roll_joint": -0.25,
+            ".*_elbow_joint": -0.9,
+            "left_wrist_roll_joint": 0.15,
+            "right_wrist_roll_joint": -0.15,
+        },
+        joint_vel={".*": 0.0},
+    ),
+    actuators={
+        "EC-A8116-P1-18H": ImplicitActuatorCfg(
+            joint_names_expr=[".*_hip_pitch_.*", ".*_hip_roll_.*", ".*_knee_.*"],  # 6
+            effort_limit_sim=40,
+            velocity_limit_sim=15.0,
+            stiffness={
+                ".*_hip_pitch_.*": 80.0,
+                ".*_hip_roll_.*": 100.0,
+                ".*_knee_.*": 150.0,
+            },
+            damping={
+                ".*_hip_pitch_.*": 3.0,
+                ".*_hip_roll_.*": 2.0,
+                ".*_knee_.*": 4.0,
+            },
+            armature=0.01,
+        ),
+        "EC-A8112-P1-18H": ImplicitActuatorCfg(
+            joint_names_expr=[".*_hip_yaw_.*", "waist_yaw_joint"],  # 3
+            effort_limit_sim=30,
+            velocity_limit_sim=17.0,
+            stiffness={
+                ".*_hip_yaw_.*": 100.0,
+                "waist_yaw_joint": 200.0,
+            },
+            damping={
+                ".*_hip_yaw_.*": 2.0,
+                "waist_yaw_joint": 5.0,
+            },
+            armature=0.01,
+        ),
+        "EC-A4315-P2-36H": ImplicitActuatorCfg(
+            joint_names_expr=[".*_ankle_pitch_.*", ".*_ankle_roll_.*"],  # 4
+            effort_limit_sim=75,
+            velocity_limit_sim=13.0,
+            stiffness={
+                ".*_ankle_pitch_.*": 18.0,
+                ".*_ankle_roll_.*": 30.0,
+            },
+            damping={
+                ".*_ankle_pitch_.*": 1.2,
+                ".*_ankle_roll_.*": 2.0,
+            },
+            armature=0.01,
+        ),
+        "EC-A4310-P2-36H": ImplicitActuatorCfg(
+            joint_names_expr=[".*_shoulder_.*", ".*_elbow_.*", ".*_wrist_roll_.*"],  # 10
+            effort_limit_sim=36,
+            velocity_limit_sim=10.0,
+            stiffness=40.0,
+            damping=1.0,
+            armature=0.01,
+        ),
+    },
+    joint_sdk_names=YE_ROBOT_CFG.joint_sdk_names.copy(),
+)
+
+
 UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
     spawn=UnitreeUrdfFileCfg(
         asset_path=f"{UNITREE_ROS_DIR}/robots/g1_description/g1_29dof_rev_1_0.urdf",
